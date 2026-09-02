@@ -1,0 +1,37 @@
+# --- WEB FRAMEWORK ---
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart
+
+# --- DATABASE & VALIDATION ---
+sqlalchemy[asyncio]==2.0.35
+aiosqlite
+asyncpg
+pydantic==2.9.2
+pydantic-settings==2.5.2
+python-dotenv==1.0.1
+email-validator  # <-- ZAROORI: auth.py mein EmailStr ke liye
+
+# --- SECURITY ---
+passlib[argon2]==1.7.4
+python-jose[cryptography]==3.3.0
+cryptography==43.0.1
+
+# --- AI / ML ---
+transformers==4.46.0
+torch==2.4.1
+torchvision==0.19.1
+pillow==10.4.0
+numpy==1.26.4
+
+# --- DATA PROCESSING ---
+pandas==2.2.2
+requests==2.32.3
+
+# --- VECTOR DATABASES ---
+qdrant-client==1.12.0
+pymongo==4.10.1
+
+# --- E-COMMERCE CONNECTORS ---
+ShopifyAPI==12.7.0
+woocommerce==3.0.0

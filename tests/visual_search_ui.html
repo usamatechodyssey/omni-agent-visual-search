@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniAgent Visual Search - Live Tester</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            margin: 0;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #a0c4ff;
+            margin-bottom: 40px;
+        }
+
+        .tester-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: #c0d9ff;
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        button {
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4);
+        }
+
+        #loader {
+            display: none;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #00c6ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .card-content {
+            padding: 15px;
+        }
+
+        .similarity-badge {
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .product-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .product-id {
+            font-size: 12px;
+            color: #777;
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: #a0c4ff;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🔍 OmniAgent Visual Search</h1>
+    <p class="subtitle">Apne products ko live search karein (E-commerce Style UI)</p>
+
+    <div class="tester-box">
+        <div class="input-group">
+            <label>Backend URL</label>
+            <input type="text" id="apiUrl" value="http://127.0.0.1:8000">
+        </div>
+        <div class="input-group">
+            <label>API Key (omni_...)</label>
+            <input type="text" id="apiKey" placeholder="omni_xxxxxxxxxxxxxxx">
+        </div>
+        <div class="input-group">
+            <label>Upload Product Image</label>
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+        <div class="input-group">
+            <button id="searchBtn" disabled>🔍 Search Products</button>
+        </div>
+    </div>
+
+    <div id="loader"></div>
+    <div id="resultsContainer" class="results-grid"></div>
+</div>
+
+<script>
+    const apiUrlInput = document.getElementById('apiUrl');
+    const apiKeyInput = document.getElementById('apiKey');
+    const imageInput = document.getElementById('imageInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const loader = document.getElementById('loader');
+    const resultsContainer = document.getElementById('resultsContainer');
+
+    // Update button state
+    function updateBtn() {
+        const hasKey = apiKeyInput.value.trim().startsWith('omni_') && apiKeyInput.value.trim().length > 20;
+        const hasImg = imageInput.files.length > 0;
+        searchBtn.disabled = !(hasKey && hasImg);
+    }
+
+    apiKeyInput.addEventListener('input', updateBtn);
+    imageInput.addEventListener('change', updateBtn);
+
+    // Search Logic
+    searchBtn.addEventListener('click', async () => {
+        const url = apiUrlInput.value.replace(/\/$/, '');
+        const key = apiKeyInput.value.trim();
+        const file = imageInput.files[0];
+
+        if (!file) return;
+
+        // UI States
+        loader.style.display = 'block';
+        resultsContainer.innerHTML = '';
+        searchBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch(`${url}/api/v1/visual/search`, {
+                method: 'POST',
+                headers: {
+                    'x-api-key': key
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Server Error');
+            }
+
+            // Render Results (Aapke backend ke saath match karta hai)
+            const results = data.results;
+            if (!results || results.length === 0) {
+                resultsContainer.innerHTML = '<div class="empty-msg">Koi product nahi mila. Dobara try karein!</div>';
+            } else {
+                resultsContainer.innerHTML = '';
+                results.forEach(item => {
+                    // Aapke JSON payload structure ke mutabiq
+                    const payload = item.payload || {};
+                    const score = Math.round(item.score * 100);
+                    const img = payload.image_url || 'https://via.placeholder.com/200?text=No+Image';
+                    const title = payload.title || 'Product';
+                    const slug = payload.slug || '#';
+
+                    // Card HTML
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+                    card.innerHTML = `
+                        <a href="/product/${slug}" target="_blank" style="text-decoration:none; color:inherit;">
+                            <img src="${img}" onerror="this.src='https://via.placeholder.com/220x180?text=Error'">
+                            <div class="card-content">
+                                <span class="similarity-badge">${score}% Match</span>
+                                <div class="product-title">${title}</div>
+                                <div class="product-id">ID: ${payload.product_id}</div>
+                            </div>
+                        </a>
+                    `;
+                    resultsContainer.appendChild(card);
+                });
+            }
+
+        } catch (error) {
+            resultsContainer.innerHTML = `<div class="empty-msg" style="color:#ff6b6b;">❌ Error: ${error.message}</div>`;
+            console.error(error);
+        } finally {
+            loader.style.display = 'none';
+            searchBtn.disabled = false;
+            updateBtn();
+        }
+    });
+</script>
+</body>
+</html>

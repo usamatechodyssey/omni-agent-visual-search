@@ -1,0 +1,31 @@
+# --- Byte-compiled / optimized / DLL files ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Security (Inhein kabhi upload mat karna) ---
+.env
+.env.local
+
+# --- Python Garbage ---
+venv/
+env/
+.venv/
+
+# --- Local Databases ---
+omni_agent.db
+fake_ecommerce.db
+*.sqlite3
+
+# --- OS Junk ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+uploaded_files/
+
+# --- FRONTEND (React/Vite) ---
+frontend_react/node_modules
+frontend_react/dist
