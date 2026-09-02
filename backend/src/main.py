@@ -49,7 +49,7 @@ async def keep_alive_loop():
     Space ko 24/7 active rakhne ke liye random ping karega.
     Lekin Pakistan Time (PKT) raat 3:30 AM se 8:00 AM tak Space ko sleep hone dega.
     """
-    space_url = os.getenv("SPACE_URL", "http://127.0.0.1:8000/")
+    space_url = os.getenv("SPACE_URL", "http://127.0.0.1:7860/")  # Default port update
     print(f"✅ Keep-Alive Loop Shuru: Target {space_url}")
 
     while True:
@@ -117,6 +117,8 @@ app.include_router(visual.router, prefix=settings.API_V1_STR, tags=["Visual Sear
 # ==========================================
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", 8000))
+    # 🔥 FIX: Hugging Face ka default port 7860 hai.
+    # Agar env PORT set na ho, toh 7860 use hoga (HF ke liye zaroori).
+    port = int(os.environ.get("PORT", 7860))
     print(f"🚀 Starting Server on Port: {port}")
     uvicorn.run("backend.src.main:app", host="0.0.0.0", port=port, reload=True)
