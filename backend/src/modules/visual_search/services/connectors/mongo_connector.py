@@ -30,7 +30,15 @@ class MongoProductConnector(BaseConnector):
     def connect(self) -> bool:
         """Connect to MongoDB and validate collection exists."""
         try:
-            self.client = pymongo.MongoClient(self.connection_string, serverSelectionTimeoutMS=5000)
+            # 🔥 FIX: tlsAllowInvalidCertificates hata diya (tlsInsecure kaafi hai)
+            self.client = pymongo.MongoClient(
+                self.connection_string,
+                serverSelectionTimeoutMS=5000,
+                connectTimeoutMS=20000,
+                socketTimeoutMS=20000,
+                tls=True,
+                tlsInsecure=True  # SSL handshake flexible, cert validation ignore
+            )
             self.client.server_info()
             self.db = self.client[self.database_name]
             self.collection = self.db[self.collection_name]
